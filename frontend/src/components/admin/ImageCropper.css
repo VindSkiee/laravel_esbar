@@ -1,0 +1,127 @@
+.image-cropper-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.cropper-container {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.cropper-container h3 {
+  margin: 0 0 20px 0;
+  text-align: center;
+  color: #2c3e50;
+  font-size: 18px;
+}
+
+.crop-area {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  max-width: 100%;
+  margin: 0 auto 20px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.crop-area img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.crop-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.crop-controls {
+  margin-bottom: 20px;
+}
+
+.crop-controls label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.crop-controls input[type="range"] {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.crop-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.cancel-btn,
+.crop-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+}
+
+.crop-btn {
+  background: #28a745;
+  color: white;
+}
+
+.crop-btn:hover {
+  background: #218838;
+}
+
+@media (max-width: 600px) {
+  .crop-area {
+    width: 100%;
+    height: 300px;
+  }
+
+  .crop-circle {
+    width: 200px;
+    height: 200px;
+  }
+}

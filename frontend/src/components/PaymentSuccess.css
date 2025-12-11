@@ -1,0 +1,88 @@
+.pay-success {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fff7f7 0%, #f7fbff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pay-success .card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.pay-success .icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.pay-success h1 {
+  margin: 0 0 8px;
+}
+
+.pay-success .detail {
+  margin: 18px 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pay-success .detail span {
+  color: #777;
+  font-size: 13px;
+}
+
+.pay-success .detail b {
+  display: block;
+  font-size: 16px;
+}
+
+.pay-success .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.pay-success button {
+  border: none;
+  background: #ff4d4d;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.pay-success button:hover {
+  background: #ff3838;
+}
+
+.pay-success button.btn-primary {
+  background: #ff4d4d;
+}
+
+.pay-success button.btn-secondary {
+  background: white;
+  color: #ff4d4d;
+  border: 2px solid #ff4d4d;
+}
+
+.pay-success button.btn-secondary:hover {
+  background: #fff5f5;
+}
+
+.pay-success button.ghost {
+  background: #f0f0f0;
+  color: #333;
+}

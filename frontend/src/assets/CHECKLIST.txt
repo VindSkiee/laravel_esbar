@@ -1,0 +1,38 @@
+# ✅ CHECKLIST CEPAT - Masukkan Gambar
+
+## 📂 LOKASI
+```
+D:\Tubes_PTI\ice-cream-79\frontend\src\assets\
+```
+
+## 📝 NAMA FILE (Copy-paste nama ini!)
+
+### WAJIB:
+```
+ice-cream.png
+```
+
+### OPSIONAL (Dekorasi):
+```
+strawberry.png
+mint.png
+blueberry.png
+candy-cane.png
+```
+
+## 🎯 LANGKAH SINGKAT
+
+1. Extract gambar dari design Anda
+2. Remove background di https://remove.bg
+3. Download & rename sesuai nama di atas
+4. Copy ke folder: `D:\Tubes_PTI\ice-cream-79\frontend\src\assets\`
+5. Refresh browser (gambar muncul otomatis!)
+
+## ⚠️ PENTING!
+- ✅ Nama file harus PERSIS (huruf kecil semua)
+- ✅ Format PNG dengan background transparan
+- ✅ Minimal ukuran 600x600px untuk ice-cream.png
+- ✅ Letakkan di folder `src/assets/` bukan tempat lain!
+
+## 🎉 SELESAI!
+Setelah file di-copy, browser akan auto-reload dan gambar langsung muncul!

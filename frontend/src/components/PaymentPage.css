@@ -1,0 +1,95 @@
+.payment-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fff7f7 0%, #f7fbff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.payment-page .card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.payment-page .label {
+  display: inline-block;
+  background: #ffe9e9;
+  color: #d53b3b;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.payment-page h1 {
+  margin: 0 0 6px;
+}
+
+.payment-page p {
+  margin: 0 0 14px;
+  color: #555;
+}
+
+.payment-page img {
+  width: 100%;
+  max-width: 240px;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
+  margin: 0 auto 14px auto;
+  display: block;
+}
+
+.payment-page .info {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 16px 0;
+}
+
+.payment-page .info span {
+  color: #777;
+  font-size: 13px;
+}
+
+.payment-page .info b {
+  display: block;
+  font-size: 16px;
+}
+
+.payment-page .actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.payment-page button {
+  border: none;
+  background: #ff4d4d;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.payment-page button.ghost {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.payment-page .alert {
+  background: #ffecec;
+  color: #c23232;
+  border: 1px solid #ffd1d1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}

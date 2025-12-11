@@ -1,0 +1,286 @@
+.invoice-wrapper {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 20px;
+}
+
+.invoice-actions {
+  max-width: 800px;
+  margin: 0 auto 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.back-btn,
+.order-again-btn,
+.print-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  white-space: nowrap;
+}
+
+.back-btn {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+}
+
+.back-btn:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.order-again-btn {
+  background: linear-gradient(135deg, #ff4545 0%, #e63939 100%);
+  color: white;
+  flex: 1;
+  justify-content: center;
+}
+
+.order-again-btn:hover {
+  background: linear-gradient(135deg, #e63939 0%, #d32f2f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 69, 69, 0.4);
+}
+
+.print-btn {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+  color: white;
+  flex: 1;
+  justify-content: center;
+}
+
+.print-btn:hover {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+.invoice-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.invoice-paper {
+  width: 80mm;
+  /* Ukuran struk thermal 80mm */
+  max-width: 80mm;
+  background: white;
+  border: 2px solid #000;
+  padding: 20px;
+  font-family: 'Courier New', monospace;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.invoice-header {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.store-logo {
+  margin-bottom: 10px;
+}
+
+.logo-box {
+  display: inline-block;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 10px 24px;
+  background: #ff3d3d;
+  color: white !important;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.logo-title {
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 2px;
+  color: white !important;
+  line-height: 1.2;
+}
+
+.logo-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: white !important;
+  line-height: 1.2;
+}
+
+.store-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.store-tagline {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.store-address {
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.store-phone {
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.invoice-divider {
+  border-top: 1px dashed #000;
+  margin: 12px 0;
+}
+
+.invoice-info {
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.info-row .right {
+  text-align: right;
+}
+
+.invoice-items {
+  margin: 15px 0;
+  font-size: 12px;
+}
+
+.items-title {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.item-group {
+  margin-bottom: 12px;
+}
+
+.item-line {
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+
+.item-line.indent {
+  padding-left: 15px;
+}
+
+.item-line.right-align {
+  text-align: right;
+  margin-top: 2px;
+}
+
+.invoice-totals {
+  font-size: 12px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.invoice-footer {
+  text-align: center;
+  font-size: 11px;
+  margin-top: 15px;
+}
+
+.invoice-app-logos {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .invoice-wrapper {
+    background: white;
+    padding: 0;
+    width: 80mm;
+  }
+
+  .invoice-container {
+    padding: 0;
+    width: 80mm;
+  }
+
+  .invoice-paper {
+    border: none;
+    box-shadow: none;
+    width: 80mm;
+    max-width: 80mm;
+    margin: 0;
+    padding: 10mm;
+  }
+}
+
+@media (max-width: 768px) {
+  .invoice-wrapper {
+    padding: 10px;
+  }
+
+  .invoice-actions {
+    flex-direction: column;
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .back-btn,
+  .order-again-btn,
+  .print-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 16px 24px;
+    font-size: 15px;
+  }
+
+  .invoice-paper {
+    padding: 15px;
+    max-width: 100%;
+  }
+
+  .store-name {
+    font-size: 16px;
+  }
+}
