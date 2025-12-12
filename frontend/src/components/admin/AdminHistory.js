@@ -86,7 +86,7 @@ const AdminHistory = () => {
 
     // Total penjualan
     const totalSales = filteredOrders.reduce(
-      (sum, order) => sum + (order.total || 0),
+      (sum, order) => sum + (Number(order.total) || 0),
       0
     );
 
@@ -206,10 +206,7 @@ const AdminHistory = () => {
                   letterSpacing: "-1px",
                 }}
               >
-                Rp
-                {stats.totalSales
-                  .toString()
-                  .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                Rp{(stats.totalSales || 0).toLocaleString('id-ID')}
               </div>
             </div>
 
@@ -379,7 +376,7 @@ const AdminHistory = () => {
                     if (existing) {
                       // Merge orders
                       existing.orders.push(order);
-                      existing.totalAmount += order.total || 0;
+                      existing.totalAmount += Number(order.total) || 0;
                       existing.items.push(...(order.items || []));
                     } else {
                       merged.push({
@@ -388,7 +385,7 @@ const AdminHistory = () => {
                         table_name: order.table_name,
                         table_id: order.table_id,
                         orders: [order],
-                        totalAmount: order.total || 0,
+                        totalAmount: Number(order.total) || 0,
                         items: order.items || [],
                         status: order.status,
                         createdAt: order.createdAt,
@@ -466,10 +463,7 @@ const AdminHistory = () => {
                             </div>
                             <div className="history-right">
                               <div className="order-total-history">
-                                Rp
-                                {mergedOrder.totalAmount
-                                  .toString()
-                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                                Rp{(mergedOrder.totalAmount || 0).toLocaleString('id-ID')}
                               </div>
                               {mergedOrder.status === "Selesai" && (
                                 <span className="status-badge success">
@@ -502,12 +496,14 @@ const AdminHistory = () => {
                           <div className="history-items">
                             {mergedOrder.items.map((it, idx) => (
                               <div className="history-item" key={idx}>
-                                {it.image && (
+                                {it.image ? (
                                   <img
-                                    src={`http://127.0.0.1:8000${it.image}`}
+                                    src={`http://127.0.0.1:8000/storage/${it.image}`}
                                     alt={it.name}
                                     className="history-item-image"
                                   />
+                                ) : (
+                                  <div className="history-no-image">🍽️</div>
                                 )}
                                 <div className="history-item-details">
                                   <div className="history-item-name">

@@ -1,144 +1,169 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/config";
+import Echo from "laravel-echo";
+import Pusher from "pusher-js";
 import "./Admin.css";
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState("");
   const [filterTable, setFilterTable] = useState("");
   const [newOrderCount, setNewOrderCount] = useState(0);
-  const [lastOrderId, setLastOrderId] = useState(null);
+  const [realtimeStatus, setRealtimeStatus] = useState("connecting");
   const navigate = useNavigate();
+  const echoRef = useRef(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     const ok = sessionStorage.getItem("adminLoggedIn") === "1";
     if (!ok) navigate("/admin");
   }, [navigate]);
 
-  // Fetch all orders with auto-refresh
+  // Fetch orders function
+  const fetchOrders = useCallback(async () => {
+    try {
+      const response = await api.get("/admin/orders/all");
+      const raw = response.data.data || response.data;
+      const normalized = (Array.isArray(raw) ? raw : [])
+        .filter((o) => o.status !== "Selesai" && o.status !== "Menunggu Pembayaran")
+        .map((o) => ({
+          ...o,
+          table_name: o.Table?.name || o.table_name || "",
+          items: (o.OrderItems || o.items || []).map((it) => ({
+            name: it.Menu?.name || it.name || it.menu_name,
+            quantity: it.quantity || it.qty,
+            image: it.Menu?.image || it.image || null,
+          })),
+        }))
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      setOrders(normalized);
+      setError("");
+      console.log(`✅ Orders fetched: ${normalized.length} orders`);
+    } catch (err) {
+      console.error("❌ Error fetching orders:", err);
+      if (isInitialMount.current) {
+        setError("Gagal memuat pesanan");
+      }
+    } finally {
+      if (isInitialMount.current) {
+        setLoading(false);
+        isInitialMount.current = false;
+      }
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchOrders = async (retryCount = 0) => {
-      const MAX_RETRIES = 3;
-      const RETRY_DELAY = 2000; // 2 seconds
+    const ok = sessionStorage.getItem("adminLoggedIn") === "1";
+    if (!ok) navigate("/admin");
+  }, [navigate]);
+
+  // Initialize Echo and setup listeners - RUN ONLY ONCE
+  useEffect(() => {
+    let mounted = true;
+    
+    // Initialize Echo
+    if (!echoRef.current) {
+      window.Pusher = Pusher;
+      Pusher.logToConsole = false;
       
-      try {
-        console.log(`🔍 Fetching orders... (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`);
-        const response = await api.get("/admin/orders/all");
-        const raw = response.data.data || response.data;
-        const normalized = (Array.isArray(raw) ? raw : [])
-          .filter((o) => o.status !== "Selesai" && o.status !== "Menunggu Pembayaran") // Hide completed and unpaid orders
-          .map((o) => ({
-            ...o,
-            table_name: o.Table?.name || o.table_name || "",
-            items: (o.OrderItems || o.items || []).map((it) => ({
-              name: it.Menu?.name || it.name || it.menu_name,
-              quantity: it.quantity || it.qty,
-              image: it.Menu?.image || it.image || null,
-            })),
-          }))
-          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // FIFO: earliest first
+      echoRef.current = new Echo({
+        broadcaster: "pusher",
+        key: "hkpxtl9nyi8ewzaecyh2",
+        wsHost: "127.0.0.1",
+        wsPort: 8080,
+        wssPort: 8080,
+        forceTLS: false,
+        enabledTransports: ["ws", "wss"],
+        disableStats: true,
+        cluster: "mt1",
+        encrypted: false,
+      });
+      console.log("✅ Echo initialized");
+    }
 
-        // Check for new orders
-        if (normalized.length > 0 && lastOrderId !== null) {
-          const latestId = Math.max(...normalized.map((o) => o.id));
-          if (latestId > lastOrderId) {
-            setNewOrderCount((prev) => prev + 1);
-            playNotificationSound();
-            // Auto-hide notification after 1 second
-            setTimeout(() => {
-              setNewOrderCount(0);
-            }, 1000);
-          }
-          setLastOrderId(latestId);
-        } else if (normalized.length > 0 && lastOrderId === null) {
-          setLastOrderId(Math.max(...normalized.map((o) => o.id)));
-        }
+    // Fetch initial orders
+    if (mounted) {
+      fetchOrders();
+    }
 
-        setOrders(normalized);
-        setError("");
-        console.log(`✅ Orders fetched successfully (${normalized.length} orders)`);
-      } catch (err) {
-        console.error(`❌ Error fetching orders (attempt ${retryCount + 1}):`, err);
-        
-        // Retry logic
-        if (retryCount < MAX_RETRIES) {
-          console.log(`⏳ Retrying in ${RETRY_DELAY/1000}s...`);
-          setTimeout(() => {
-            fetchOrders(retryCount + 1);
-          }, RETRY_DELAY);
-          return; // Don't set error yet, we're retrying
+    // Setup Reverb listeners
+    const ordersChannel = echoRef.current.channel("orders");
+    
+    ordersChannel
+      .listen(".order.created", (event) => {
+        console.log("🔔 NEW ORDER:", event);
+        if (mounted) {
+          setNewOrderCount((prev) => prev + 1);
+          playNotificationSound();
+          fetchOrders();
+          setTimeout(() => setNewOrderCount(0), 3000);
         }
-        
-        // Only show error after all retries failed
-        if (initialLoad) {
-          setError("Gagal memuat pesanan setelah beberapa percobaan. Periksa koneksi database.");
+      })
+      .listen(".order.status.updated", (event) => {
+        console.log("🔄 STATUS UPDATE:", event);
+        if (mounted) {
+          fetchOrders();
         }
-      } finally {
-        if (initialLoad) {
-          setLoading(false);
-          setInitialLoad(false);
-        }
+      });
+
+    // Connection monitoring
+    const handleConnected = () => {
+      console.log("✅ Reverb connected");
+      if (mounted) setRealtimeStatus("connected");
+    };
+
+    const handleDisconnected = () => {
+      console.log("⚠️ Reverb disconnected");
+      if (mounted) setRealtimeStatus("disconnected");
+    };
+
+    echoRef.current.connector.pusher.connection.bind("connected", handleConnected);
+    echoRef.current.connector.pusher.connection.bind("disconnected", handleDisconnected);
+
+    // Cleanup - DON'T disconnect Echo, just cleanup listeners
+    return () => {
+      mounted = false;
+      console.log("🔌 Cleanup listeners (keeping Echo connected)");
+      if (echoRef.current) {
+        echoRef.current.connector.pusher.connection.unbind("connected", handleConnected);
+        echoRef.current.connector.pusher.connection.unbind("disconnected", handleDisconnected);
       }
     };
-
-    fetchOrders();
-
-    // Socket.IO disabled untuk testing - gunakan polling saja
-    // const socket = io(process.env.REACT_APP_API_URL?.replace("/api", "") || "http://localhost:4000");
-    // socketRef.current = socket;
-
-    console.log("📊 Polling mode - checking orders every 10 seconds");
-
-    // Listen untuk order baru atau update (DISABLED)
-    // socket.on("newOrder", () => {
-    //   console.log("🔔 New order received via socket");
-    //   fetchOrders();
-    // });
-
-    // socket.on("orderStatusUpdate", () => {
-    //   console.log("🔔 Order status updated via socket");
-    //   fetchOrders();
-    // });
-
-    // Polling setiap 10 detik untuk update orders
-    const fallbackInterval = setInterval(() => {
-      console.log("🔄 Polling orders...");
-      fetchOrders();
-    }, 10000); // 10 detik
-
-    return () => {
-      clearInterval(fallbackInterval);
-      // Socket cleanup disabled
-      // if (socketRef.current) {
-      //   socketRef.current.disconnect();
-      // }
-    };
-  }, [lastOrderId, initialLoad]);
+  }, [fetchOrders]);
 
   const playNotificationSound = () => {
-    // Simple beep notification
-    const audioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    try {
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      
+      // Resume context if suspended (browser security)
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
 
-    oscillator.frequency.value = 800;
-    oscillator.type = "sine";
+      oscillator.frequency.value = 800;
+      oscillator.type = "sine";
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.5
-    );
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContext.currentTime + 0.5
+      );
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (err) {
+      console.log("🔇 Sound notification blocked by browser");
+    }
   };
 
   const toggleDone = async (group) => {
@@ -201,7 +226,7 @@ const AdminDashboard = () => {
     if (existing) {
       // Merge orders
       existing.orders.push(order);
-      existing.totalAmount += order.total || 0;
+      existing.totalAmount += Number(order.total) || 0;
       
       // Merge items with same name
       (order.items || []).forEach((newItem) => {
@@ -221,7 +246,7 @@ const AdminDashboard = () => {
         table_name: order.table_name,
         table_id: order.table_id,
         orders: [order],
-        totalAmount: order.total || 0,
+        totalAmount: Number(order.total) || 0,
         items: [...(order.items || [])],
         status: order.status,
         createdAt: order.createdAt,
@@ -309,6 +334,13 @@ const AdminDashboard = () => {
             <h2>Pesanan Aktif</h2>
             <p className="muted">
               {groupedOrders.length} pesanan aktif saat ini
+              {" • "}
+              <span style={{ 
+                color: realtimeStatus === "connected" ? "#10b981" : realtimeStatus === "connecting" ? "#f59e0b" : "#ef4444",
+                fontWeight: 500
+              }}>
+                {realtimeStatus === "connected" ? "🟢 Real-time Active" : realtimeStatus === "connecting" ? "🟡 Connecting..." : "🔴 Using Fallback"}
+              </span>
             </p>
           </div>
           <div className="header-actions">
@@ -347,7 +379,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         ) : (
-          groupedOrders.slice(0, 8).map((group, idx) => {
+          groupedOrders.map((group, idx) => {
             const invoiceNumbers = group.orders
               .map((o) => String(o.id).padStart(2, "0"))
               .join(", ");
@@ -386,12 +418,14 @@ const AdminDashboard = () => {
                   {group.items && group.items.length > 0 ? (
                     group.items.map((it, itemIdx) => (
                       <div className="item-pill" key={itemIdx}>
-                        {it.image && (
+                        {it.image ? (
                           <img
-                            src={`http://127.0.0.1:8000${it.image}`}
+                            src={`http://127.0.0.1:8000/storage/${it.image}`}
                             alt={it.name}
                             className="item-thumb"
                           />
+                        ) : (
+                          <div className="no-image-placeholder">🍽️</div>
                         )}
                         <div className="info">
                           <div className="name">
@@ -412,10 +446,7 @@ const AdminDashboard = () => {
                   <div className="order-total-section">
                     <span className="total-label">TOTAL BAYAR</span>
                     <span className="total-value">
-                      Rp
-                      {group.totalAmount
-                        .toString()
-                        .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                      Rp{(group.totalAmount || 0).toLocaleString('id-ID')}
                     </span>
                   </div>
                   {group.status === "Selesai" ? (

@@ -348,7 +348,7 @@ const AdminMenu = () => {
                         src={
                           formData.imagePreview.startsWith("blob")
                             ? formData.imagePreview
-                            : `http://127.0.0.1:8000${formData.imagePreview}`
+                            : `http://127.0.0.1:8000/storage/${formData.imagePreview}`
                         }
                         alt="Preview"
                         style={{
@@ -506,7 +506,7 @@ const AdminMenu = () => {
                     <div className="menu-thumb" style={{ overflow: "hidden" }}>
                       {m.image ? (
                         <img
-                          src={`http://127.0.0.1:8000${m.image}`}
+                          src={`http://127.0.0.1:8000/storage/${m.image}`}
                           alt={m.name}
                           style={{
                             width: "100%",

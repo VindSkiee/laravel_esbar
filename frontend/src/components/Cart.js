@@ -167,7 +167,7 @@ const Cart = () => {
               <div className="cart-thumb">
                 {item.image ? (
                   <img
-                    src={`http://127.0.0.1:8000${item.image}`}
+                    src={`http://127.0.0.1:8000/storage/${item.image}`}
                     alt={item.name}
                     style={{
                       width: "100%",

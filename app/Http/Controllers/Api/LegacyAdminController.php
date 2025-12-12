@@ -98,7 +98,7 @@ class LegacyAdminController extends Controller
                         'Menu' => [
                             'id' => $item->menu->id ?? null,
                             'name' => $item->menu->name ?? '',
-                            'image' => $item->menu->image ? "/storage/menus/{$item->menu->image}" : null,
+                            'image' => $item->menu->image ?? null,
                         ],
                     ];
                 }),
@@ -106,7 +106,7 @@ class LegacyAdminController extends Controller
                     return [
                         'name' => $item->menu->name ?? '',
                         'quantity' => $item->quantity,
-                        'image' => $item->menu->image ? "/storage/menus/{$item->menu->image}" : null,
+                        'image' => $item->menu->image ?? null,
                     ];
                 }),
             ];
@@ -210,7 +210,7 @@ class LegacyAdminController extends Controller
                 'price' => $menu->price,
                 'description' => $menu->description,
                 'category' => $menu->category,
-                'image' => $menu->image ? "/storage/{$menu->image}" : null,
+                'image' => $menu->image,
                 'status' => $menu->status,
                 'created_at' => $menu->created_at,
             ];
@@ -258,7 +258,7 @@ class LegacyAdminController extends Controller
                 'price' => $menu->price,
                 'description' => $menu->description,
                 'category' => $menu->category,
-                'image' => $menu->image ? "/storage/{$menu->image}" : null,
+                'image' => $menu->image,
                 'status' => $menu->status,
             ],
         ], 201);
@@ -306,7 +306,7 @@ class LegacyAdminController extends Controller
                 'price' => $menu->price,
                 'description' => $menu->description,
                 'category' => $menu->category,
-                'image' => $menu->image ? "/storage/{$menu->image}" : null,
+                'image' => $menu->image,
                 'status' => $menu->status,
             ],
         ]);

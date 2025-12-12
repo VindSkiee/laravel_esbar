@@ -11,6 +11,7 @@ use App\Models\Table as TableModel;
 use App\Events\OrderCreatedEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -294,6 +295,13 @@ class LegacyCompatibilityController extends Controller
         $tableId = $request->input('table_id') ?? session('table_id');
         $customerName = $request->customer_name;
 
+        Log::info("🛒 Checkout attempt", [
+            'table_id_from_request' => $request->input('table_id'),
+            'table_id_from_session' => session('table_id'),
+            'final_table_id' => $tableId,
+            'customer_name' => $customerName,
+        ]);
+
         if (!$tableId) {
             throw ValidationException::withMessages([
                 'table_id' => ['Table ID diperlukan.'],
@@ -302,6 +310,12 @@ class LegacyCompatibilityController extends Controller
 
         // Get cart items
         $carts = Cart::with('menu')->where('table_id', $tableId)->get();
+
+        Log::info("🛒 Cart query result", [
+            'table_id' => $tableId,
+            'cart_count' => $carts->count(),
+            'all_carts_in_db' => Cart::all()->pluck('table_id')->toArray(),
+        ]);
 
         if ($carts->isEmpty()) {
             throw ValidationException::withMessages([
@@ -322,7 +336,7 @@ class LegacyCompatibilityController extends Controller
                 'customer_name' => $customerName,
                 'total' => $total,
                 'tracking_code' => Order::generateTrackingCode(),
-                'status' => 'Menunggu Pembayaran',
+                'status' => 'Sedang Disiapkan',
             ]);
 
             // Create order items
@@ -343,8 +357,9 @@ class LegacyCompatibilityController extends Controller
             // Load relationships
             $order->load(['items.menu', 'table']);
 
-            // Broadcast event (temporarily disabled for testing without Reverb)
-            // event(new OrderCreatedEvent($order));
+            // Broadcast event
+            Log::info("🔔 Broadcasting OrderCreatedEvent for order #{$order->id}");
+            event(new OrderCreatedEvent($order));
 
             // Return legacy format
             return response()->json([

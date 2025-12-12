@@ -33,7 +33,7 @@ class OrderCreatedEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('admin-orders'),
+            new Channel('orders'),
             new PrivateChannel('table.' . $this->order->table_id),
         ];
     }

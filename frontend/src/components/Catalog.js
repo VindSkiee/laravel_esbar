@@ -452,7 +452,7 @@ const Catalog = () => {
                         process.env.REACT_APP_API_URL
                           ? process.env.REACT_APP_API_URL.replace("/api", "")
                           : "http://127.0.0.1:8000"
-                      }${product.image}`}
+                      }/storage/${product.image}`}
                       alt={product.name}
                       style={{
                         width: "100%",
