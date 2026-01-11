@@ -319,10 +319,6 @@ const Catalog = () => {
     return sorted.map((key) => ({ key, icon: iconSet[key] || iconSet.Default }));
   }, [products]);
 
-  if (loading) {
-    return <div className="catalog-container">Memuat katalog...</div>;
-  }
-
   if (error) {
     return (
       <div className="catalog-container">

@@ -13,9 +13,10 @@ class TableSeeder extends Seeder
     public function run(): void
     {
         for ($i = 1; $i <= 20; $i++) {
-            Table::create([
-                'name' => 'Meja ' . $i,
-            ]);
+            Table::updateOrCreate(
+                ['name' => 'Meja ' . $i],
+                []
+            );
         }
     }
 }

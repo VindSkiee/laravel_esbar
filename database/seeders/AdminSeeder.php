@@ -12,14 +12,14 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        Admin::create([
-            'username' => 'admin',
-            'password_hash' => Admin::hashPassword('admin123'),
-        ]);
+        Admin::updateOrCreate(
+            ['username' => 'admin'],
+            ['password_hash' => Admin::hashPassword('admin123')]
+        );
 
-        Admin::create([
-            'username' => 'esbar_admin',
-            'password_hash' => Admin::hashPassword('esbar2024'),
-        ]);
+        Admin::updateOrCreate(
+            ['username' => 'esbar_admin'],
+            ['password_hash' => Admin::hashPassword('esbar2024')]
+        );
     }
 }
