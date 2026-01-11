@@ -12,6 +12,7 @@ const AdminDashboard = () => {
   const [filterTable, setFilterTable] = useState("");
   const [newOrderCount, setNewOrderCount] = useState(0);
   const [realtimeStatus, setRealtimeStatus] = useState("connecting");
+  const [processingGroups, setProcessingGroups] = useState({});
   const navigate = useNavigate();
   const echoRef = useRef(null);
   const isInitialMount = useRef(true);
@@ -27,7 +28,8 @@ const AdminDashboard = () => {
       const response = await api.get("/admin/orders/all");
       const raw = response.data.data || response.data;
       const normalized = (Array.isArray(raw) ? raw : [])
-        .filter((o) => o.status !== "Selesai" && o.status !== "Menunggu Pembayaran")
+        // Keep only completed orders out of the active list; include "Menunggu Pembayaran"
+        .filter((o) => o.status !== "Selesai")
         .map((o) => ({
           ...o,
           table_name: o.Table?.name || o.table_name || "",
@@ -167,18 +169,55 @@ const AdminDashboard = () => {
   };
 
   const toggleDone = async (group) => {
+    // show loader for this group
+    setProcessingGroups((p) => ({ ...p, [group.key]: true }));
     try {
-      // Mark all orders in the group as done
+      // Default behavior: if group.status === "Menunggu Pembayaran" we treat this
+      // as a payment flow (mark as paid). For other statuses we still allow
+      // marking as finished. For payment we call a dedicated endpoint so that
+      // we don't trigger the kitchen workflow.
       const orderIds = group.orders.map((o) => o.id);
-      
+
+      if (group.status === "Menunggu Pembayaran") {
+        // Show a quick confirmation for cashier
+        const ok = window.confirm(
+          `Tandai pesanan (${orderIds.join(', ')}) sebagai DIBAYAR?\nPilih OK untuk tunai.`
+        );
+        if (!ok) return;
+
+        // Use a payment endpoint if available. Backend may need to support this.
+        // We send method: 'tunai' by default. Include a safety flag to hint skipping kitchen.
+        for (const orderId of orderIds) {
+          try {
+            await api.post(`/admin/orders/${orderId}/payment`, {
+              method: "tunai",
+              skip_kitchen: true,
+            });
+          } catch (innerErr) {
+            // Fallback: try marking with a status field but instruct server not to notify kitchen
+            await api.put(`/admin/orders/${orderId}/status`, {
+              status: "Dibayar",
+              skip_kitchen: true,
+            });
+          }
+        }
+
+        // Remove paid orders from local view
+        setOrders((prev) => prev.filter((o) => !orderIds.includes(o.id)));
+
+        // Play confirmation sound and redirect after a short delay
+        playNotificationSound();
+        setTimeout(() => navigate("/admin/history"), 700);
+        return;
+      }
+
+      // Otherwise keep old behavior: mark as Selesai
       for (const orderId of orderIds) {
         await api.put(`/admin/orders/${orderId}/status`, { status: "Selesai" });
       }
 
       // Update local state - remove all orders from this group
-      setOrders((prev) =>
-        prev.filter((o) => !orderIds.includes(o.id))
-      );
+      setOrders((prev) => prev.filter((o) => !orderIds.includes(o.id)));
 
       // Play sound once when marking done
       playNotificationSound();
@@ -190,6 +229,9 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error("Error updating order status:", err);
       alert("Gagal mengupdate status pesanan");
+    } finally {
+      // hide loader
+      setProcessingGroups((p) => ({ ...p, [group.key]: false }));
     }
   };
 
@@ -453,11 +495,26 @@ const AdminDashboard = () => {
                     <button className="status-btn done" disabled>
                       ✓ Pesanan Selesai
                     </button>
+                  ) : group.status === "Menunggu Pembayaran" ? (
+                    <button
+                      className="status-btn primary"
+                      onClick={() => toggleDone(group)}
+                      disabled={!!processingGroups[group.key]}
+                    >
+                      {processingGroups[group.key] && (
+                        <span className="btn-spinner" aria-hidden="true" />
+                      )}
+                      Tandai Dibayar
+                    </button>
                   ) : (
                     <button
                       className="status-btn primary"
                       onClick={() => toggleDone(group)}
+                      disabled={!!processingGroups[group.key]}
                     >
+                      {processingGroups[group.key] && (
+                        <span className="btn-spinner" aria-hidden="true" />
+                      )}
                       Tandai Selesai
                     </button>
                   )}

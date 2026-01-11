@@ -1,6 +1,7 @@
 {
   "name": "ice-cream-frontend",
   "version": "1.0.0",
+  "homepage": ".",
   "description": "ES BAR 79 Ice Cream & Coffee Frontend",
   "private": true,
   "dependencies": {

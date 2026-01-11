@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="ES BAR 79 Ice Cream & Coffee" />
+    <title>ES BAR 79 - Ice Cream & Coffee</title>
+    <script defer src="./js/main.4ca0f446.js"></script>
+    <link href="./css/main.7b7e05b1.css" rel="stylesheet">
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script>
+      // If the user opened the file under /frontend/*, redirect them to root '/'
+      // so React Router sees the expected base path.
+      try {
+        const p = window.location.pathname || '';
+        if (p.startsWith('/frontend') && p !== '/') {
+          // Preserve query and hash
+          const search = window.location.search || '';
+          const hash = window.location.hash || '';
+          window.location.replace('/' + search + hash);
+        }
+      } catch (e) {
+        // ignore in case of CSP or other errors
+        console.error('Redirect helper error:', e);
+      }
+    </script>
+    <div id="root"></div>
+  </body>
+</html>
